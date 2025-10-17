@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TRE Construtora — Gerador de Orçamentos v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--azul:#0b2d63;--amarelo:#fdd835;--borda:#e5e7eb;}
+body{font-family:'Inter',sans-serif;background:#f8f9fa;margin:0;color:#111827}
+header{background:#fff;padding:16px 0;border-bottom:1px solid var(--borda)}
+.wrap{max-width:950px;margin:0 auto;padding:0 20px}
+h1{color:var(--azul);font-size:20px;margin:0}
+.brand{display:flex;align-items:center;gap:16px}
+.brand img{height:60px;width:auto;object-fit:contain}
+.card{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:18px;margin:20px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,textarea{width:100%;border:1px solid var(--borda);border-radius:8px;padding:10px;margin-top:4px;font:inherit}
+textarea{resize:vertical;min-height:80px}
+.section-title{font-weight:700;margin-bottom:8px}
+.actions{display:flex;gap:10px;margin-top:15px}
+button{border:0;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer}
+.primary{background:var(--azul);color:#fff}
+.secondary{background:#111827;color:#fff}
+.checkbox-line{display:flex;justify-content:space-between;margin-top:12px;gap:10px}
+.cb{display:flex;align-items:center;gap:8px;border:1px solid var(--azul);border-radius:6px;padding:8px 12px;background:#f9fafb;flex:1;justify-content:center}
+.box{width:18px;height:18px;border:2px solid var(--azul);border-radius:3px;display:flex;align-items:center;justify-content:center;user-select:none;cursor:pointer;background:#fff;color:var(--azul);font-weight:bold}
+footer{text-align:center;color:#6b7280;font-size:12px;padding:20px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap brand">
+    <img id="logoPreview" src="" alt="Logo TRE">
+    <div>
+      <h1>TRE CONSTRUTORA & REFORMAS</h1>
+      <div style="font-size:13px;color:#6b7280">
+        CNPJ: 62.541.163/0001-39<br>
+        Tel: (11) 96668-8625 / (11) 91244-9847<br>
+        E-mail: treconstrutora@gmail.com
+      </div>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:10px">
+    <label style="font-weight:600;font-size:13px;">Logo (PNG/JPG)</label>
+    <input type="file" id="logoInput" accept="image/*" style="font-size:12px;width:240px"/>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <div class="section-title">Informações Gerais</div>
+    <div class="grid">
+      <div><label>Título</label><input id="titulo" value="ORÇAMENTO DE OBRA / PROPOSTA COMERCIAL"></div>
+      <div><label>Nº do Orçamento</label><input id="numero" placeholder="TRE-2025-001"></div>
+      <div><label>Data</label><input id="data" type="date"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Dados do Cliente</div>
+    <div class="grid">
+      <div><label>Cliente</label><input id="cliente"></div>
+      <div><label>CPF / CNPJ</label><input id="doc"></div>
+      <div><label>Endereço da Obra</label><input id="endereco"></div>
+      <div><label>Contato</label><input id="contato"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Serviços</div>
+    <textarea id="servicos" placeholder="Descreva os serviços, um por linha..."></textarea>
+    <div style="text-align:right;margin-top:10px">
+      <label style="background:var(--amarelo);padding:4px 8px;border-radius:6px;">TOTAL (R$)</label><br>
+      <input id="total" placeholder="0,00" style="width:200px">
+      <input id="extenso" placeholder="Valor por extenso (opcional)" style="width:200px;margin-top:6px">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Condições & Materiais</div>
+    <div class="grid">
+      <div><label>Prazo de Execução</label><input id="prazo" placeholder="15 dias úteis após aprovação"></div>
+      <div><label>Validade da Proposta</label><input id="validade" placeholder="10 dias corridos"></div>
+    </div>
+
+    <div class="checkbox-line">
+      <div class="cb"><div class="box" id="boxCliente"></div>Materiais por conta do cliente</div>
+      <div class="cb"><div class="box" id="boxEmpresa"></div>Materiais por conta da empresa</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Assinaturas</div>
+    <div class="grid">
+      <div><label>Responsável pelo Orçamento</label><input id="resp" placeholder="Ex: Gabryell Felix"></div>
+      <div><label>Cliente</label><input id="assinCliente" placeholder="Ex: Thyego Souza"></div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="btnPdf">Baixar PDF</button>
+    <button class="secondary" id="btnExemplo">Preencher Exemplo</button>
+  </div>
+
+  <footer>
+    Este orçamento é uma estimativa sujeita a alterações mediante visita técnica e aprovação de projeto.<br>
+    <b style="color:#0b2d63">Elaborado por TRE CONSTRUTORA & REFORMAS</b>
+  </footer>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const readLogo = f => new Promise(r => {const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f);});
+let logoDataURL=null;
+$('#logoInput').addEventListener('change',async e=>{
+ const f=e.target.files?.[0];if(!f)return;
+ logoDataURL=await readLogo(f);
+ $('#logoPreview').src=logoDataURL;
+});
+const toggle = el => el.textContent = el.textContent==='✓'?'':'✓';
+$('#boxCliente').onclick = ()=>toggle($('#boxCliente'));
+$('#boxEmpresa').onclick = ()=>toggle($('#boxEmpresa'));
+
+$('#btnExemplo').onclick=()=>{
+ $('#cliente').value='Thyego Souza';
+ $('#doc').value='341.332.718-66';
+ $('#endereco').value='Rua Odilon Dantas Cortez, 174';
+ $('#contato').value='(11) 96668-8625';
+ $('#servicos').value='Telhado\nReboco dentro e fora da casa\nContra piso\nAssentamento das janelas e portas\nLevantamento de 5 pilares\nEscada da entrada\nCaixinhas e conduítes';
+ $('#total').value='34.260,00';
+ $('#extenso').value='Trinta e quatro mil duzentos e sessenta reais';
+ $('#prazo').value='15 dias úteis após aprovação';
+ $('#validade').value='20 dias';
+ $('#data').valueAsDate=new Date();
+ $('#numero').value='TRE-2025-023';
+ $('#resp').value='Gabryell Felix';
+ $('#assinCliente').value='Thyego Souza';
+ $('#boxCliente').textContent='✓';$('#boxEmpresa').textContent='';
+};
+
+$('#btnPdf').onclick=async()=>{
+ const {jsPDF}=window.jspdf;
+ const pdf=new jsPDF('p','pt','a4');
+ const azul='#0b2d63',left=40,right=555;
+ let y=40;
+ if(logoDataURL){
+   const imgProps=await pdf.getImageProperties(logoDataURL);
+   const h=(imgProps.height/imgProps.width)*60;
+   pdf.addImage(logoDataURL,'PNG',left,y,80,h);
+ }
+ pdf.setTextColor(azul);pdf.setFont('helvetica','bold');pdf.setFontSize(14);
+ pdf.text($('#titulo').value,right,y+25,{align:'right'});
+
+ y+=70;
+ pdf.setTextColor('#111827');pdf.setFont('helvetica','normal');pdf.setFontSize(10);
+ pdf.text('TRE CONSTRUTORA & REFORMAS',left,y);
+ pdf.text('CNPJ: 62.541.163/0001-39',left,y+14);
+ pdf.text('Telefone: (11) 96668-8625 / (11) 91244-9847',left,y+28);
+ pdf.text('E-mail: treconstrutora@gmail.com',left,y+42);
+
+ y+=70;
+ pdf.setFont('helvetica','bold');pdf.text('Dados do Cliente',left,y);
+ pdf.autoTable({startY:y+6,head:[['Campo','Valor']],
+ body:[
+   ['Cliente',$('#cliente').value],
+   ['CPF/CNPJ',$('#doc').value],
+   ['Endereço da Obra',$('#endereco').value],
+   ['Telefone/E-mail',$('#contato').value],
+   ['Data do Orçamento',$('#data').value],
+   ['Nº do Orçamento',$('#numero').value]
+ ],
+ styles:{fontSize:10},headStyles:{fillColor:[11,45,99],textColor:255},
+ margin:{left,right:40}
+});
+
+ y=pdf.lastAutoTable.finalY+16;
+ pdf.text('Descrição dos Serviços',left,y);
+ const servs=$('#servicos').value.split('\n').filter(Boolean).map(s=>[s]);
+ pdf.autoTable({startY:y+6,head:[['Serviço']],body:servs,
+ styles:{fontSize:10},headStyles:{fillColor:[245,246,248]},theme:'grid',margin:{left,right:40}});
+
+ y=pdf.lastAutoTable.finalY+20;
+ pdf.setFillColor(253,216,53);
+ pdf.rect(left,y,right-left,24,'F');
+ pdf.setFont('helvetica','bold');pdf.setTextColor('#111827');
+ pdf.text('TOTAL (R$):',left+8,y+16);
+ pdf.text($('#total').value,right-8,y+16,{align:'right'});
+
+ y+=36;
+ pdf.text('Condições Gerais',left,y);
+ pdf.setFont('helvetica','normal');
+ y+=14;pdf.text(`• Prazo de execução: ${$('#prazo').value}`,left,y);
+ y+=14;pdf.text(`• Validade da proposta: ${$('#validade').value}`,left,y);
+
+ y+=22;
+ pdf.setFont('helvetica','bold');pdf.text('Materiais',left,y);
+ y+=8;pdf.setDrawColor(11,45,99);
+ pdf.rect(left+10,y,14,14,'S');
+ pdf.rect(left+280,y,14,14,'S');
+ pdf.setFont('helvetica','normal');pdf.setTextColor(azul);
+ if($('#boxCliente').textContent==='✓')pdf.text('✓',left+17,y+11,{align:'center'});
+ if($('#boxEmpresa').textContent==='✓')pdf.text('✓',left+287,y+11,{align:'center'});
+ pdf.setTextColor('#111827');
+ pdf.text('Materiais por conta do cliente',left+32,y+11);
+ pdf.text('Materiais por conta da empresa',left+300,y+11);
+
+ y+=60;
+ const lw=(right-left-20)/2;
+ pdf.line(left,y,left+lw,y);
+ pdf.line(left+20+lw,y,right,y);
+ pdf.setTextColor('#111827');
+ pdf.text(`Responsável pelo Orçamento — ${$('#resp').value}`,left+lw/2,y+14,{align:'center'});
+ pdf.text(`Cliente — ${$('#assinCliente').value}`,left+20+lw+lw/2,y+14,{align:'center'});
+ pdf.setFontSize(9);pdf.setTextColor('#6b7280');
+ pdf.text('Assinatura Digital (opcional)',left+lw/2,y+26,{align:'center'});
+ pdf.text('Assinatura Digital (opcional)',left+20+lw+lw/2,y+26,{align:'center'});
+
+ y+=46;
+ pdf.setFontSize(9.5);pdf.setTextColor('#6b7280');
+ pdf.text('Este orçamento é uma estimativa sujeita a alterações mediante visita técnica e aprovação de projeto.',297.5,y,{align:'center'});
+ y+=12;pdf.setFont('helvetica','bold');pdf.setTextColor(azul);
+ pdf.text('Elaborado por TRE CONSTRUTORA & REFORMAS',297.5,y,{align:'center'});
+ pdf.save('Orçamento_TRE_Construtora.pdf');
+};
+</script>
+</body>
+</html>
